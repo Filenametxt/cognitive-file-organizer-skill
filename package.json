@@ -1,0 +1,28 @@
+{
+  "name": "file-organizer-skills",
+  "version": "1.0.0",
+  "description": "Agent Skills (/fsortcheck and /fsortdump) for cognitive file & cloud storage organization using Miller's Law (7 +- 2), MCP servers (Nextcloud, WebDAV, Google Drive), and local filesystems.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Filenametxt/file-organizer.git"
+  },
+  "keywords": [
+    "agent-skills",
+    "skills",
+    "file-organizer",
+    "fsortcheck",
+    "fsortdump",
+    "millers-law",
+    "unsloth",
+    "unsloth-studio",
+    "mcp",
+    "nextcloud",
+    "claude-code",
+    "cursor",
+    "codex",
+    "antigravity",
+    "local-llm"
+  ],
+  "author": "Filenametxt",
+  "license": "MIT"
+}
