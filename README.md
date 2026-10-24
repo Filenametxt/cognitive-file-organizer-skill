@@ -8,7 +8,9 @@
 
 Autonomous, move-only **AI Agent Skills** that organize your **local folders** or **cloud storage (Nextcloud, WebDAV, Google Drive via MCP)** using **Miller's Law ($7 \pm 2$ items per folder)** and **self-documenting `README.md` indexes**.
 
-> **Tested on [Unsloth Desktop](https://unsloth.ai)** with local GGUF models and compatible with **Claude Code, Cursor, OpenAI Codex, Google Antigravity, Windsurf, Cline, and OpenCode**.
+### Why Local LLMs? (Privacy by Design)
+> Giant cloud LLMs can process massive file trees without getting confused, but giving a cloud model read access to your **entire personal archive** (IDs, finances, medical records, private notes) is a major **privacy risk**.
+> **File Organizer** was originally engineered to guide **small, local LLMs** (tested on **[Unsloth Desktop](https://unsloth.ai)**) with the right cognitive framing: by limiting folders to **5–9 items** and writing local `README.md` summaries, a compact local model can organize your files reliably with **100% local privacy**—while remaining fully compatible with **Claude Code, Cursor, Codex, Antigravity, and OpenCode**.
 
 ---
 
@@ -27,7 +29,7 @@ Autonomous, move-only **AI Agent Skills** that organize your **local folders** o
 2. **Move-Only (Never Deletes Files)**: Files are **only moved (`move_file`)**, never deleted—except verified byte-for-byte duplicates sharing the **exact same SHA-256 hash**.
 3. **Protects Code Projects**: Detects programming projects (`Cargo.toml`, `package.json`, `pyproject.toml`, `go.mod`, `.git`, etc.) and moves them as **intact atomic units** without touching internal files.
 4. **Self-Documenting `README.md`**: Places a short `README.md` in every organized subfolder so future LLMs know what belongs inside without re-reading every file.
-5. **Smart Inspection & Re-Check**: Learns unreadable binary formats (`.docx`, `.zip`) to avoid wasted tool calls, and always re-verifies folders with `list_files` before finishing.
+5. **Smart Re-Check & Final Summary Report**: Learns unreadable binary formats (`.docx`, `.zip`) to avoid wasted tool calls, re-verifies folders with `list_files`, and always outputs a clear **Summary Report (`Source ➔ Destination`)** at the end.
 
 ---
 
@@ -43,7 +45,7 @@ Autonomous, move-only **AI Agent Skills** that organize your **local folders** o
   [3. Move & Balance (7 ± 2)] ──► Keep 5–9 items/folder · Protect code projects · Move-only
          │
          ▼
-  [4. Document & Verify] ──► Write subfolder README.md · Re-check with list_files
+  [4. Document, Verify & Report] ──► Write README.md · Re-check list_files · Final Summary Report
 ```
 
 ---

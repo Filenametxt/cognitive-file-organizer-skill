@@ -112,6 +112,23 @@ For each folder containing **more than 9 items (OVERFLOW)** or needing consolida
    - Call `list_files` on the folder to confirm that all moves succeeded and that item counts now respect the **5 to 9 items** range.
    - Never remove any consolidated old folder shell without first calling `list_files` on it and proving it contains `0` remaining user items (`[]`).
 
-### Step 3: Proceed to Next Folder & Final Summary
+### Step 3: Proceed to Next Folder & Mandatory Final Summary Report
 - Repeat Step 2 for the next folder until the entire target tree is balanced and documented.
-- Present a clean summary table showing created subfolders, generated `README.md` files, moved files, and final item counts.
+- **MANDATORY FINAL SUMMARY REPORT**: Once all tool calls and `list_files` verifications are complete, you **MUST** output a concise final summary report (translated into the user's language) following this exact structure:
+
+```markdown
+### Summary Report (`/fsortcheck`)
+
+**1. Folders & Subfolders Organized (Miller's Law: 7 ± 2)**
+- `Category/Subfolder` — X items (Status: OK)
+
+**2. Moved Files & Atomic Projects (`Source ➔ Destination`)**
+- `old/path/file.ext` ➔ `NewCategory/Subfolder/file.ext`
+- `old/path/project_dir/` ➔ `Projects/project_dir/` *(Atomic Project)*
+
+**3. Generated / Updated `README.md` Indexes**
+- `Category/README.md`, `Category/Subfolder/README.md`
+
+**4. Final Verification**
+- All organized folders verified via `list_files`. Zero user files deleted.
+```
