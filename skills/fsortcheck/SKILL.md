@@ -14,8 +14,13 @@ Reorganize any target directory or storage archive by applying **Miller's Law (7
 1. **LANGUAGE ADAPTATION**:
    - Always communicate with the user and write generated `README.md` files in the **same language used by the user** (e.g., Italian if prompted in Italian, English if prompted in English).
 
-2. **TOTAL COVERAGE (No Skipped Folders)**:
+2. **TOTAL COVERAGE WITH ATOMIC SOFTWARE PROJECT PROTECTION**:
    - Every directory in the target scope (including `Photos`, `Templates`, `Documents`, `Upload`, `University`, `Projects`, etc.) must be inspected and reorganized if it exceeds **9 items**.
+   - **CRITICAL EXCEPTION — DO NOT FRAGMENT SOFTWARE / CODE PROJECTS**:
+     - If a folder is a **software or programming project** (detected by markers such as `Cargo.toml` for Rust, `package.json` / `tsconfig.json` for JS/TS, `pyproject.toml` / `requirements.txt` for Python, `go.mod` for Go, `CMakeLists.txt` / `Makefile` for C/C++, `pom.xml` / `build.gradle` for Java/Kotlin, `pubspec.yaml` for Flutter/Dart, `*.sln` / `*.csproj`, `Dockerfile`, or `.git/`):
+     - **Treat the entire project directory as a single ATOMIC unit.**
+     - **NEVER split, rename, or move files/folders inside a code project** (e.g., never touch `src/`, `target/`, `Cargo.toml`, `lib/`, `tests/`), as doing so would break builds, imports, and version control.
+     - You may only move the **whole project root folder intact** into a parent category (e.g., `Projects/Rust/<project_name>` or `Projects/Python/<project_name>`) if the parent `Projects/` folder exceeds 9 projects, and you must **never overwrite an existing project's `README.md`**.
 
 3. **CONTENT INSPECTION & DYNAMIC TOOL-CAPABILITY LEARNING**:
    - To accurately determine semantic context, **inspect file contents** whenever a suitable tool is available (e.g., text/markdown readers, vision tools for images, document parsers).

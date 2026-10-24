@@ -14,7 +14,13 @@ Completely empty a transit, inbox, or dump directory (such as `Upload`, `Downloa
 1. **LANGUAGE ADAPTATION**:
    - Always communicate with the user and write generated `README.md` files in the **same language used by the user** (e.g., Italian if prompted in Italian, English if prompted in English).
 
-2. **CONTENT INSPECTION & DESTINATION `README.md` LOOKUP**:
+2. **ATOMIC SOFTWARE PROJECT PROTECTION (Never Fragment Codebases)**:
+   - If a folder inside the dump directory is a **software or programming project** (contains `Cargo.toml`, `package.json`, `pyproject.toml`, `requirements.txt`, `go.mod`, `CMakeLists.txt`, `Makefile`, `pom.xml`, `build.gradle`, `pubspec.yaml`, `Dockerfile`, or `.git/`):
+   - **Treat the entire project folder as a single ATOMIC unit.**
+   - **NEVER split, reorganize, or alter files inside the project** (such as `src/`, `Cargo.toml`, `package.json`, etc.) and **never overwrite the project's own `README.md`**.
+   - Move the **entire project folder intact** to the appropriate destination (e.g., `Projects/<project_name>` or `Projects/Rust/<project_name>`).
+
+3. **CONTENT INSPECTION & DESTINATION `README.md` LOOKUP**:
    - Before routing a file into a candidate destination folder, if that folder contains a `README.md`, **read it first**: it is the primary source of truth on whether the file belongs there.
    - To understand the semantic context of a file in the dump folder, **read its content** when a suitable tool is available.
    - **Memory of Unsupported File Formats (Tool-Capability Learning)**:
@@ -23,21 +29,21 @@ Completely empty a transit, inbox, or dump directory (such as `Upload`, `Downloa
      - For all subsequent files with the same extension, **skip reading the file body** and infer the destination from the filename, extension, and folder context.
      - If a dedicated tool for that format is present in the environment, use it normally.
 
-3. **GENERATE `README.md` IN NEW DESTINATION FOLDERS**:
+4. **GENERATE `README.md` IN NEW DESTINATION FOLDERS**:
    - Whenever you create a new folder or subfolder in the main filesystem to receive items from the dump:
      - Generate a `README.md` inside it describing its purpose, allowed file types, and routing rules for future LLMs.
 
-4. **DIRECT TOOL EXECUTION (Zero Reasoning Loops)**:
+5. **DIRECT TOOL EXECUTION (Zero Reasoning Loops)**:
    - Never simulate or write pseudo-code tool calls (`tool_name(...)`) inside your thought block or text response.
    - Emit **actual tool calls immediately** (`create_folder`, `move_file`, `write_file`).
 
-5. **STRICT FAIL-FAST ON ERRORS**:
+6. **STRICT FAIL-FAST ON ERRORS**:
    - If any file operation returns an error (e.g., **HTTP 404**, *File not found*, *Permission denied*):
      1. **STOP IMMEDIATELY**. Do not proceed with subsequent files.
      2. Do not delete anything from the dump folder.
      3. Report the exact filename and error to the user.
 
-6. **ZERO-REMAINDER GUARANTEE**:
+7. **ZERO-REMAINDER GUARANTEE**:
    - At the end of the process, explicitly run `list_files` on the dump directory to verify and certify that it contains **0 files and 0 folders**.
 
 ---

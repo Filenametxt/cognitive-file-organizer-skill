@@ -39,13 +39,14 @@ It is **100% backend-agnostic**: use it on your **local filesystem** via standar
 
 Most prompts asking an LLM to "organize my files" fail in practice: models either dump everything into generic folders, hallucinate file paths, get stuck in infinite Chain-of-Thought calculation loops on local models, or silently lose files when a server error occurs.
 
-**File Organizer** solves these problems with five behavioral guarantees:
+**File Organizer** solves these problems with six behavioral guarantees:
 
 1. **Miller's Law ($7 \pm 2$ Rule)**: Every folder is structured to hold an optimal **5 to 9 items**. If a directory exceeds **9 items** (`OVERFLOW`), the agent creates semantic or chronological subfolders to reduce human cognitive load.
-2. **Self-Documenting `README.md` in Every Subfolder**: Whenever a folder or subfolder is created or reorganized, the agent writes a concise `README.md` inside it describing its purpose, allowed file types, and routing rules. Future LLM runs read these `README.md` files first to make instant, deterministic placement decisions.
-3. **Dynamic Tool-Capability Learning**: The agent inspects file contents to understand context whenever a suitable tool exists. If a file format (e.g., `.docx`, `.zip`, or binary files) lacks a reader tool in the current session, the agent **remembers that extension as unreadable** and skips redundant read calls on subsequent files of the same type—while automatically using new parser tools as soon as you add them in the future.
-4. **Strict Fail-Fast Protocol**: Always verifies source existence before moving (`list_files` before `move_file`). If any server or I/O error occurs (such as `HTTP 404 Not Found`), the agent **stops immediately**, never deletes unverified files, and reports the exact error.
-5. **Anti-Loop Prompt Engineering for Local LLMs**: Specifically tuned so local quantized models emit direct tool calls (`create_folder`, `move_file`, `write_file`) one folder at a time without getting trapped in endless reasoning monologues.
+2. **Atomic Software Project Protection**: Automatically detects programming and code project directories (e.g., **Rust** `Cargo.toml`, **Python** `pyproject.toml`, **Node/TS** `package.json`, **Go** `go.mod`, **C/C++** `CMakeLists.txt` / `Makefile`, `.git/`, etc.) and treats them as **indivisible atomic units**. It will move a whole project folder into `Projects/Rust/` if needed, but will **never** split or corrupt internal source trees (`src/`, `target/`, configs, or project `README.md` files).
+3. **Self-Documenting `README.md` in Every Subfolder**: Whenever a folder or subfolder is created or reorganized, the agent writes a concise `README.md` inside it describing its purpose, allowed file types, and routing rules. Future LLM runs read these `README.md` files first to make instant, deterministic placement decisions.
+4. **Dynamic Tool-Capability Learning**: The agent inspects file contents to understand context whenever a suitable tool exists. If a file format (e.g., `.docx`, `.zip`, or binary files) lacks a reader tool in the current session, the agent **remembers that extension as unreadable** and skips redundant read calls on subsequent files of the same type—while automatically using new parser tools as soon as you add them in the future.
+5. **Strict Fail-Fast Protocol**: Always verifies source existence before moving (`list_files` before `move_file`). If any server or I/O error occurs (such as `HTTP 404 Not Found`), the agent **stops immediately**, never deletes unverified files, and reports the exact error.
+6. **Anti-Loop Prompt Engineering for Local LLMs**: Specifically tuned so local quantized models emit direct tool calls (`create_folder`, `move_file`, `write_file`) one folder at a time without getting trapped in endless reasoning monologues.
 
 ---
 
@@ -90,8 +91,10 @@ Processes a transit, inbox, or dump folder (such as `Upload`, `Downloads`, or `I
        │
        ▼
 ┌──────────────────────────────────────────────────────────────┐
-│ 4. APPLY MILLER'S LAW (7 ± 2 ITEMS PER FOLDER)               │
+│ 4. APPLY MILLER'S LAW (7 ± 2) & PROTECT CODE PROJECTS        │
 │    • Keep 5 to 9 items per folder                            │
+│    • Detect codebases (Cargo.toml, package.json, .git, etc.) │
+│      and treat them as ATOMIC units (never split internals!) │
 │    • If > 9 items (OVERFLOW) -> create thematic subfolders   │
 │    • Move files atomically (Strict Fail-Fast on HTTP 404)    │
 └──────────────────────────────────────────────────────────────┘

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
 File Organizer Helper Script
-Cognitive load auditor based on Miller's Law (7 ± 2 rule: optimal range 5 to 9 items per folder)
-and Zero-Remainder verifier for dump/inbox directories.
+Cognitive load auditor based on Miller's Law (7 ± 2 rule: optimal range 5 to 9 items per folder),
+Atomic Software Project detector, and Zero-Remainder verifier for dump/inbox directories.
 Backend-agnostic utility for local filesystems and mounted WebDAV/Nextcloud directories.
 """
 
@@ -16,10 +16,66 @@ IDEAL_MIN = 5
 IDEAL_MAX = 9
 TARGET_COUNT = 7
 
+# Markers that identify a directory as an atomic software/code project root.
+# Internal files and subdirectories of a project MUST NEVER be split or reorganized.
+PROJECT_MARKERS = {
+    # Rust
+    "Cargo.toml",
+    "Cargo.lock",
+    # Python
+    "pyproject.toml",
+    "setup.py",
+    "requirements.txt",
+    "Pipfile",
+    "uv.lock",
+    # JavaScript / TypeScript / Node / Bun
+    "package.json",
+    "tsconfig.json",
+    "bun.lock",
+    "bun.lockb",
+    "yarn.lock",
+    "pnpm-lock.yaml",
+    # Go
+    "go.mod",
+    "go.sum",
+    # C / C++ / Rust / Zig / Make / CMake
+    "CMakeLists.txt",
+    "Makefile",
+    "meson.build",
+    "build.zig",
+    # Java / Kotlin / Gradle / Maven
+    "pom.xml",
+    "build.gradle",
+    "build.gradle.kts",
+    # Flutter / Dart / Mobile / .NET / PHP / Ruby
+    "pubspec.yaml",
+    "composer.json",
+    "Gemfile",
+    # Containers / Nix / Git / IDE
+    ".git",
+    "Dockerfile",
+    "docker-compose.yml",
+    "flake.nix",
+}
+
+
+def detect_project_markers(dirs: list[str], files: list[str]) -> list[str]:
+    """
+    Return any software project markers found in the given directory's entries.
+    """
+    entries = set(dirs) | set(files)
+    found = sorted(marker for marker in PROJECT_MARKERS if marker in entries)
+    # Also check for .sln or .csproj files
+    for f in files:
+        if f.endswith((".sln", ".csproj", ".fsproj", ".xcodeproj")):
+            found.append(f)
+    return found
+
 
 def audit_directory(root_path: Path, max_depth: int = 3, recursive: bool = True):
     """
-    Scan directory structure and check compliance with Miller's Law (7 ± 2).
+    Scan directory structure, detect atomic software projects, and check compliance
+    with Miller's Law (7 ± 2).
     """
     results = []
     root_path = root_path.resolve()
@@ -30,16 +86,39 @@ def audit_directory(root_path: Path, max_depth: int = 3, recursive: bool = True)
 
     for current_dir, dirs, files in os.walk(root_path):
         current = Path(current_dir)
-        # Ignore hidden directories and files
-        dirs[:] = [d for d in dirs if not d.startswith(".")]
-        visible_files = [f for f in files if not f.startswith(".") and f.lower() != "readme.md"]
-
         rel_path = current.relative_to(root_path)
         depth = len(rel_path.parts)
         if depth > max_depth:
+            dirs.clear()
             continue
 
+        # Detect if this directory is a software project BEFORE stripping .git
+        markers = detect_project_markers(dirs, files)
+        # Ignore hidden directories and files for item counting
+        dirs[:] = [d for d in dirs if not d.startswith(".")]
+        visible_files = [f for f in files if not f.startswith(".") and f.lower() != "readme.md"]
         item_count = len(dirs) + len(visible_files)
+
+        if markers and current != root_path:
+            marker_str = ", ".join(markers[:3])
+            results.append(
+                {
+                    "path": str(rel_path),
+                    "folders": len(dirs),
+                    "files": len(visible_files),
+                    "total": item_count,
+                    "has_readme": any(f.lower() == "readme.md" for f in files),
+                    "status": "PROJECT",
+                    "action": (
+                        f"Atomic software project ({marker_str}). "
+                        "DO NOT split or modify internal files; move only the whole project folder if needed."
+                    ),
+                }
+            )
+            # Do not recurse inside a software project's internal tree
+            dirs.clear()
+            continue
+
         status = "OK"
         action = "Optimal (within Miller's Law: 5-9 items)"
 
@@ -93,7 +172,7 @@ def check_dump_status(dump_path: Path):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="File Organizer Helper — Miller's Law (7 ± 2) Auditor & Dump Verifier"
+        description="File Organizer Helper — Miller's Law (7 ± 2) Auditor & Project Detector"
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
