@@ -40,9 +40,10 @@ Completely empty the **contents** (both loose files and subfolders) of a transit
    - Read existing destination `README.md` files first to confirm where files belong.
    - Read file contents when a reader tool is available. If an extension (e.g., `.docx`, `.zip`, binary files, or images without vision tools) fails or returns binary bytes, **remember that extension as unreadable** for the session and skip reading subsequent files of that extension, routing them by filename and path context.
 
-7. **LANGUAGE ADAPTATION & FAIL-FAST**:
+7. **EXACT LITERAL PATHS & ANTI-LOOP 404 RECOVERY (NEVER TRANSLATE FILENAMES)**:
+   - Always copy the **exact character-for-character `"path"` string** from the JSON returned by your list-files tool. **Never** auto-translate filenames or folder names between languages in your head (e.g., if `list_files` returns `"Upload/Tesi/tesi.pdf"` or `"Università"`, **never** call a tool with `"Upload/Tesi/thesis.pdf"` or `"University"`).
+   - If any `move_file` or `move_folder` call returns `404 NotFound` ("could not be located") or `412 PreconditionFailed`, **STOP guessing in your `<think>` block immediately**—never repeat the same thought or retry the same path in a loop. Immediately call your list-files tool on that folder, read the exact `"path"` field from the JSON response, and use that exact string (with destination directory ending in `/`, e.g., `"Università/"`).
    - Communicate and write `README.md` files in the **same language used by the user**.
-   - If any file move fails with an error (such as HTTP 404), **stop immediately** and report the error.
 
 ---
 

@@ -35,10 +35,10 @@ Reorganize any target directory or storage archive by applying **Miller's Law (7
    - Read existing folder `README.md` files first as the primary source of truth.
    - Read file contents when a reader tool is available. If an extension (e.g., `.docx`, `.zip`, binary files, or images without vision tools) fails or returns binary bytes, **remember that extension as unreadable** for the session and skip reading subsequent files of that extension, inferring context from filename and path instead.
 
-6. **SELF-DOCUMENTING `README.md` & LANGUAGE ADAPTATION**:
-   - Communicate and write `README.md` files in the **same language used by the user**.
-   - For every organized folder and newly created subfolder, create or update its `README.md` so future LLMs know what belongs inside.
-   - Work **one folder at a time** and **stop immediately (Fail-Fast)** if any file move returns an error (such as HTTP 404).
+6. **EXACT LITERAL PATHS, ANTI-LOOP 404 RECOVERY & LANGUAGE ADAPTATION**:
+   - Always copy the **exact character-for-character `"path"` string** from the JSON returned by your list-files tool. **Never** auto-translate filenames or folder names between languages in your head (e.g., if `list_files` returns `"tesi.pdf"` or `"Università"`, **never** change it to `"thesis.pdf"` or `"University"`).
+   - If any `move_file` or `move_folder` call returns `404 NotFound` ("could not be located") or `412 PreconditionFailed`, **STOP guessing in your `<think>` block immediately**—never repeat the same thought or retry the same path in a loop. Immediately call your list-files tool on that folder, read the exact `"path"` field from the JSON response, and use that exact string (with destination directory ending in `/`, e.g., `"Università/"`).
+   - Communicate and write `README.md` files in the **same language used by the user**. For every organized folder and newly created subfolder, create or update its `README.md` so future LLMs know what belongs inside.
 
 ---
 
