@@ -1,6 +1,6 @@
-# File Organizer — AI Agent Skills (`fsortcheck` & `fsortdump`)
+# Cognitive File Organizer Skill (`fsortcheck` & `fsortdump`)
 
-[![Agent Skills](https://img.shields.io/badge/Agent_Skills-SKILL.md-blue)](https://github.com/Filenametxt/file-organizer)
+[![Agent Skills](https://img.shields.io/badge/Agent_Skills-SKILL.md-blue)](https://github.com/Filenametxt/cognitive-file-organizer-skill)
 [![Tested on Unsloth Desktop](https://img.shields.io/badge/Tested_on-Unsloth_Desktop-2ea44f)](https://unsloth.ai)
 [![MCP Ready](https://img.shields.io/badge/MCP-Local_%7C_Nextcloud_%7C_Cloud-orange)](https://modelcontextprotocol.io)
 [![SkillSpector SAFE](https://img.shields.io/badge/NVIDIA_SkillSpector-SAFE-76b900)](https://github.com/NVIDIA/SkillSpector)
@@ -10,7 +10,7 @@ Autonomous, move-only **AI Agent Skills** that organize your **local folders** o
 
 ### Why Local LLMs? (Privacy by Design)
 > Giant cloud LLMs can process massive file trees without getting confused, but giving a cloud model read access to your **entire personal archive** (IDs, finances, medical records, private notes) is a major **privacy risk**.
-> **File Organizer** was originally engineered to guide **small, local LLMs** (tested on **[Unsloth Desktop](https://unsloth.ai)**) with the right cognitive framing: by limiting folders to **5–9 items** and writing local `README.md` summaries, a compact local model can organize your files reliably with **100% local privacy**—while remaining fully compatible with **Claude Code, Cursor, Codex, Antigravity, and OpenCode**.
+> **Cognitive File Organizer** was originally engineered to guide **small, local LLMs** (tested on **[Unsloth Desktop](https://unsloth.ai)**) with the right cognitive framing: by limiting folders to **5–9 items** and writing local `README.md` summaries, a compact local model can organize your files reliably with **100% local privacy**—while remaining fully compatible with **Claude Code, Cursor, Codex, Antigravity, and OpenCode**.
 
 ---
 
@@ -54,13 +54,13 @@ Autonomous, move-only **AI Agent Skills** that organize your **local folders** o
 
 ### Automatic Install (Unsloth Desktop, Claude, Cursor, Codex, Antigravity)
 ```bash
-git clone https://github.com/Filenametxt/file-organizer.git ~/.local/share/agent-repos/file-organizer
-~/.local/share/agent-repos/file-organizer/install.sh
+git clone https://github.com/Filenametxt/cognitive-file-organizer-skill.git ~/.local/share/agent-repos/cognitive-file-organizer-skill
+~/.local/share/agent-repos/cognitive-file-organizer-skill/install.sh
 ```
 
 ### Or via `npx skills`
 ```bash
-npx skills add Filenametxt/file-organizer
+npx skills add Filenametxt/cognitive-file-organizer-skill
 ```
 
 ---

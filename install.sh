@@ -5,8 +5,8 @@ set -euo pipefail
 # Supports: Unsloth Desktop (Unsloth Studio), Claude Code, OpenAI Codex CLI,
 #           Cursor, Google Antigravity, and universal ~/.agents/skills.
 
-REPO_URL="https://github.com/Filenametxt/file-organizer.git"
-INSTALL_BASE="${HOME}/.local/share/agent-repos/file-organizer"
+REPO_URL="https://github.com/Filenametxt/cognitive-file-organizer-skill.git"
+INSTALL_BASE="${HOME}/.local/share/agent-repos/cognitive-file-organizer-skill"
 
 # Determine source directory (if running from cloned checkout vs curl pipe)
 SCRIPT_DIR=""
@@ -17,7 +17,7 @@ fi
 if [ -n "$SCRIPT_DIR" ] && [ -d "$SCRIPT_DIR/skills/fsortcheck" ]; then
   SOURCE_DIR="$SCRIPT_DIR"
 else
-  echo "==> Cloning file-organizer into ${INSTALL_BASE}..."
+  echo "==> Cloning cognitive-file-organizer-skill into ${INSTALL_BASE}..."
   mkdir -p "$(dirname "$INSTALL_BASE")"
   if [ -d "$INSTALL_BASE/.git" ]; then
     git -C "$INSTALL_BASE" pull --ff-only

@@ -1,5 +1,5 @@
 {
-  "name": "file-organizer",
+  "name": "cognitive-file-organizer-skill",
   "description": "Cognitive file organization skills (/fsortcheck and /fsortdump) based on Miller's Law (7 +- 2) for local filesystems and Cloud MCP servers.",
   "version": "1.0.0"
 }

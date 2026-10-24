@@ -1,13 +1,13 @@
 {
-  "name": "file-organizer",
+  "name": "cognitive-file-organizer-skill",
   "description": "Cognitive file organization skills (/fsortcheck and /fsortdump) for AI agents based on Miller's Law (7 +- 2), Zero-Remainder inbox emptying, and self-documenting subfolder READMEs. Compatible with local filesystems and Cloud MCP servers (Nextcloud, WebDAV, Google Drive).",
   "version": "1.0.0",
   "author": {
     "name": "Filenametxt",
     "url": "https://github.com/Filenametxt"
   },
-  "homepage": "https://github.com/Filenametxt/file-organizer",
-  "repository": "https://github.com/Filenametxt/file-organizer",
+  "homepage": "https://github.com/Filenametxt/cognitive-file-organizer-skill",
+  "repository": "https://github.com/Filenametxt/cognitive-file-organizer-skill",
   "license": "MIT",
   "keywords": [
     "agent-skills",
