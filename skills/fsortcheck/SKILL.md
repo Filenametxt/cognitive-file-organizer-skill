@@ -6,7 +6,7 @@ description: "Reorganize local filesystems or cloud storage (Nextcloud, WebDAV, 
 # fsortcheck — Filesystem Cognitive Restructuring (Miller's Law)
 
 > **EXECUTION GATE**: If this `SKILL.md` is already loaded in your context, **DO NOT call `read_skill` again**. Immediately start Step 1 by calling your active storage/MCP tools.
-> **EXACT TOOL NAMES**: Always call the **exact tool name** declared in your active tool definitions (for example, `mcp__...__nextcloud_list_files`, `mcp__...__nextcloud_move_file`, `mcp__...__nextcloud_create_folder`, `mcp__...__nextcloud_read_file`, `mcp__...__nextcloud_write_file`, or your local filesystem tools). **NEVER** invent bare function names that are not in your registered tool schema.
+> **EXACT TOOL NAMES**: Always call the **exact tool name** declared in your active tool definitions (or load deferred MCP tools with `mcp_tool_search` if present). If no storage or MCP tools are present in your active tool definitions, stop immediately and tell the user that the MCP server / storage tools are currently disabled or disconnected.
 
 Reorganize any target directory or storage archive by applying **Miller's Law (7 ± 2 items per folder: optimal range 5 to 9)** across all directories, aligning with the user's category taxonomy (mental model), and generating a self-documenting `README.md` in every organized folder and subfolder.
 
@@ -64,14 +64,14 @@ Reorganize any target directory or storage archive by applying **Miller's Law (7
 ## 3. Step-by-Step Operational Workflow
 
 1. **Step 1 — Root Scan & Category Alignment**:
-   - Call your list-files tool (e.g., `mcp__...__nextcloud_list_files`) on the root directory `/` and on each non-excluded directory to count actual items.
+   - Call your active list-files tool on the root directory `/` and on each non-excluded directory to count actual items.
    - If the user has not specified their top-level categories, propose categories (`Personal`, `University`, `Finance`, `Projects`) and ask for confirmation.
 2. **Step 2 — Folder-by-Folder Reorganization (Miller's Law: 5 to 9 Items)**:
    - For each directory with **more than 9 items (OVERFLOW)** or needing consolidation into the user's categories:
      1. Inspect contents with your list-files tool (and check subfolders to protect atomic software projects).
-     2. Create logical thematic subfolders using your create-folder tool (e.g., `mcp__...__nextcloud_create_folder`) so every folder holds **5 to 9 items**.
-     3. Move files into their subfolders using your move-file tool (e.g., `mcp__...__nextcloud_move_file`). If a destination folder with the same name already exists, move inner items individually.
-     4. Write or update the `README.md` in the parent folder and each new subfolder using your write-file tool (e.g., `mcp__...__nextcloud_write_file`).
+     2. Create logical thematic subfolders using your active create-folder tool so every folder holds **5 to 9 items**.
+     3. Move files into their subfolders using your active move-file tool. If a destination folder with the same name already exists, move inner items individually.
+     4. Write or update the `README.md` in the parent folder and each new subfolder using your active write-file tool.
      5. Re-check with your list-files tool to confirm item counts (`5–9`) and verify `[]` (`0` items) before removing any consolidated empty folder shell.
 3. **Step 3 — Final Summary**:
    - Once all folders are balanced and documented, present a clean summary table of reorganized folders, moved files, and generated `README.md` indexes.

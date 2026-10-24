@@ -6,7 +6,7 @@ description: "Empty and reorganize files and subfolders from a dump or inbox fol
 # fsortdump — Dump / Inbox Zero-Remainder Organizer
 
 > **EXECUTION GATE**: If this `SKILL.md` is already loaded in your context, **DO NOT call `read_skill` again**. Immediately start Step 1 by calling your active storage/MCP tools.
-> **EXACT TOOL NAMES**: Always call the **exact tool name** declared in your active tool definitions (for example, `mcp__...__nextcloud_list_files`, `mcp__...__nextcloud_move_file`, `mcp__...__nextcloud_create_folder`, `mcp__...__nextcloud_read_file`, `mcp__...__nextcloud_write_file`, or your local filesystem tools). **NEVER** invent bare function names that are not in your registered tool schema.
+> **EXACT TOOL NAMES**: Always call the **exact tool name** declared in your active tool definitions (or load deferred MCP tools with `mcp_tool_search` if present). If no storage or MCP tools are present in your active tool definitions, stop immediately and tell the user that the MCP server / storage tools are currently disabled or disconnected.
 
 Completely empty the **contents** (both loose files and subfolders) of a transit, inbox, or dump directory (such as `Upload`, `Downloads`, or `Inbox`) by moving every file and subfolder into the organized filesystem, respecting **Miller's Law (7 ± 2: 5 to 9 items per folder)** and updating subfolder `README.md` indexes.
 
@@ -69,10 +69,10 @@ Whenever you create a new subfolder in the main filesystem (for instance, when a
 ## 3. Step-by-Step Operational Workflow
 
 1. **Step 1 — List Root & Dump Folder**:
-   - Call your list-files tool (e.g., `mcp__...__nextcloud_list_files`) on the root directory `/` (to see exact category folder names, e.g., `Personal`, `Università`, `Finanze`, `Progetti`) and on `/Upload`.
+   - Call your active list-files tool on the root directory `/` (to see exact category folder names, e.g., `Personal`, `Università`, `Finanze`, `Progetti`) and on `/Upload`.
    - For **every subfolder** (`"is_directory": true`) found inside `/Upload`, call your list-files tool on `/Upload/<subfolder>` to see all files and projects inside it.
 2. **Step 2 — Move Loose Files & Subfolder Contents**:
-   - Move each loose file in `/Upload` (except `Upload/README.md`) to its matching destination category/subfolder using your move-file tool (e.g., `mcp__...__nextcloud_move_file`).
+   - Move each loose file in `/Upload` (except `Upload/README.md`) to its matching destination category/subfolder using your active move-file tool.
    - Move atomic software projects intact to `Projects/` (`Progetti/`), and move the contents of regular subfolders inside `/Upload/<subfolder>` to their proper destination folders.
    - If any destination folder exceeds **9 items**, create a thematic subfolder and write its `README.md`.
 3. **Step 3 — Re-Verify & Report**:
