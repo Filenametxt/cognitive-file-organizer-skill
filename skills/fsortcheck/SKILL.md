@@ -3,63 +3,46 @@ name: fsortcheck
 description: "Reorganize local filesystems or cloud storage (Nextcloud, WebDAV, Google Drive via MCP) applying Miller's Law (7 +- 2 items per folder), aligning with the user's mental model and generating self-documenting README.md files in each subfolder."
 ---
 
-# /fsortcheck — Filesystem Cognitive Restructuring (Miller's Law)
+# fsortcheck — Filesystem Cognitive Restructuring (Miller's Law)
 
-Reorganize any target directory or storage archive by applying **Miller's Law (7 ± 2 items per folder: optimal range 5 to 9)** across all directories, aligning with the user's mental model (category taxonomy), and generating a self-documenting `README.md` in every organized folder and subfolder so future LLMs can understand the structure and make autonomous routing decisions.
+> **EXECUTION GATE**: If this `SKILL.md` is already loaded in your context, **DO NOT call `read_skill` again**. Immediately start Step 1 by calling your active storage/MCP tools.
+> **EXACT TOOL NAMES**: Always call the **exact tool name** declared in your active tool definitions (for example, `mcp__...__nextcloud_list_files`, `mcp__...__nextcloud_move_file`, `mcp__...__nextcloud_create_folder`, `mcp__...__nextcloud_read_file`, `mcp__...__nextcloud_write_file`, or your local filesystem tools). **NEVER** invent bare function names that are not in your registered tool schema.
+
+Reorganize any target directory or storage archive by applying **Miller's Law (7 ± 2 items per folder: optimal range 5 to 9)** across all directories, aligning with the user's category taxonomy (mental model), and generating a self-documenting `README.md` in every organized folder and subfolder.
 
 ---
 
-## 1. Core Principles, Move-Only Safety & Tool-Capability Learning
+## 1. Core Safety & Inspection Rules
 
-1. **ZERO FILE DELETION POLICY (MOVE-ONLY ORGANIZER)**:
-   - **You are a File Organizer, NOT a File Deleter.** Your job is to **MOVE (`move_file`)** files and folders into an organized structure, **NEVER to delete user files (`delete_file` / `rm`)**.
-   - **THE ONLY EXCEPTION FOR FILES — VERIFIED IDENTICAL DUPLICATES (SAME HASH)**:
-     - You may delete a duplicate file **ONLY IF** you have verified that an identical copy already exists with the **exact same cryptographic hash (SHA-256 / MD5)** (or verified byte-for-byte identical content and exact `size_bytes`).
-     - **NEVER** assume two files are duplicates based only on having the same or similar filename! If two files have the same name but different hashes/sizes, rename one (`filename_v2.ext`) and **move** it so zero user data is ever lost.
-   - **EMPTY FOLDER SHELL CLEANUP ONLY AFTER `list_files` = `[]`**:
-     - You may only remove an obsolete directory shell (after consolidating all of its files into the user's categories) **after** calling `list_files` on that exact directory in the immediately preceding step and confirming it returns `[]` (`0` files and `0` subfolders).
-     - **NEVER** delete a permanent inbox/dump container folder (`/Upload`, `/Downloads`, `/Inbox`).
+1. **MOVE-ONLY POLICY (NEVER DELETE USER FILES)**:
+   - You are a **File Organizer**, not a file deleter. Always **move** files to their organized folders; **never delete user files**.
+   - **Single Exception (Identical Hash Duplicates)**: A duplicate file may only be deleted if you have verified that an identical copy already exists with the **exact same cryptographic hash (SHA-256 / MD5)** and byte size. If two files share a name but differ in content/hash, rename one (`_v2`) and move it.
+   - **Never** delete a permanent inbox/dump container folder (`/Upload`, `/Downloads`, `/Inbox`).
 
-2. **`size_bytes: 0` ON A DIRECTORY NEVER MEANS IT IS EMPTY!**:
-   - In Nextcloud, WebDAV, and MCP directory listings, every directory (`"is_directory": true`) **ALWAYS reports `"size_bytes": 0`** even when it contains hundreds of files and subfolders!
-   - **NEVER** assume a directory or subfolder is empty because `size_bytes` is `0`.
-   - The **ONLY** valid way to check what is inside a directory (or verify if it is empty) is to call `list_files(path="<directory_path>")` directly on that directory and verify the returned list.
+2. **`size_bytes: 0` ON A DIRECTORY NEVER MEANS IT IS EMPTY**:
+   - In Nextcloud, WebDAV, and MCP listings, every directory (`"is_directory": true`) **always reports `"size_bytes": 0`** even when full of files.
+   - **Never** assume a directory is empty based on `size_bytes: 0`. Always call your list-files tool directly on that directory path to see its actual contents.
 
-3. **LANGUAGE ADAPTATION & `README.md` PROTECTION**:
-   - Always communicate with the user and write generated `README.md` files in the **same language used by the user** (e.g., Italian if prompted in Italian, English if prompted in English).
-   - **NEVER move one folder's `README.md` into another folder** (e.g., never move `Documents/README.md` to `Personal/README.md`, as that overwrites `Personal`'s index!).
+3. **MANDATORY RE-CHECK BEFORE REMOVING ANY CONSOLIDATED FOLDER SHELL**:
+   - If you consolidate an old directory (e.g., `/Documents` or `/Notes`) into the user's categories and plan to remove the empty old directory shell, you **must** call your list-files tool on that directory in the immediately preceding step and confirm it returns `[]` (`0` items). If even 1 user item remains inside, move it first—never delete a non-empty folder.
+   - **Never** move one folder's `README.md` into another folder (doing so would overwrite the destination folder's `README.md`).
 
-4. **TOTAL COVERAGE WITH ATOMIC SOFTWARE PROJECT PROTECTION**:
-   - Every directory in the target scope (unless explicitly excluded by the user) must be inspected with `list_files` and reorganized if it exceeds **9 items**.
-   - **CRITICAL EXCEPTION — DO NOT FRAGMENT SOFTWARE / CODE PROJECTS**:
-     - If a folder is a **software or programming project** (detected by markers such as `Cargo.toml` for Rust, `package.json` / `tsconfig.json` for JS/TS, `pyproject.toml` / `requirements.txt` for Python, `go.mod` for Go, `CMakeLists.txt` / `Makefile` for C/C++, `pom.xml` / `build.gradle` for Java/Kotlin, `pubspec.yaml` for Flutter/Dart, `*.sln` / `*.csproj`, `Dockerfile`, or `.git/`):
-     - **Treat the entire project directory as a single ATOMIC unit.**
-     - **NEVER split, rename, or move files/folders inside a code project** (e.g., never touch `src/`, `target/`, `Cargo.toml`, `lib/`, `tests/`), as doing so would break builds, imports, and version control.
-     - You may only move the **whole project root folder intact** into a parent category (e.g., `Projects/Rust/<project_name>` or `Progetti/Code/<project_name>`) if the parent folder exceeds 9 projects, and you must **never overwrite an existing project's `README.md`**.
+4. **ATOMIC SOFTWARE PROJECT PROTECTION (Never Fragment Codebases)**:
+   - If a folder is a **software or programming project** (contains `Cargo.toml`, `package.json`, `tsconfig.json`, `pyproject.toml`, `requirements.txt`, `go.mod`, `CMakeLists.txt`, `Makefile`, `pom.xml`, `build.gradle`, `pubspec.yaml`, `Dockerfile`, or `.git`), treat the **entire project directory as an indivisible atomic unit**.
+   - **Never** split, rename, or move internal files/folders inside a code project (`src/`, `target/`, `Cargo.toml`, etc.) and **never** overwrite a project's own `README.md`. You may only move the whole project folder intact into a parent category (e.g., `Projects/Rust/<project_name>`) if the parent exceeds 9 projects.
 
-5. **CONTENT INSPECTION & DYNAMIC TOOL-CAPABILITY LEARNING**:
-   - To accurately determine semantic context, **inspect file contents** whenever a suitable tool is available (e.g., text/markdown readers, vision tools for images, document parsers).
-   - **Memory of Unsupported File Formats**:
-     - If a file has an extension for which no reading tool is available, or the tool fails / returns unreadable binary bytes (e.g., `.docx`, `.zip`, raw binaries, or images without a vision tool):
-     - **Remember that file extension as unreadable** for the remainder of the current session.
-     - For all subsequent files sharing that extension, **skip reading the file body** and infer semantic context from the filename, extension, and path metadata.
-     - If a dedicated tool for that format is available (or added in the future, e.g., a `.docx` MCP tool), use it normally.
+5. **CONTENT INSPECTION & TOOL-CAPABILITY LEARNING**:
+   - Read existing folder `README.md` files first as the primary source of truth.
+   - Read file contents when a reader tool is available. If an extension (e.g., `.docx`, `.zip`, binary files, or images without vision tools) fails or returns binary bytes, **remember that extension as unreadable** for the session and skip reading subsequent files of that extension, inferring context from filename and path instead.
 
-6. **SELF-DOCUMENTING `README.md` IN EVERY FOLDER & SUBFOLDER**:
-   - For every folder or subfolder created or reorganized, create or update a `README.md` file inside it.
-   - This file enables both humans and future LLMs to immediately understand the folder's purpose, allowed file types, and routing rules without scanning every file inside.
-   - **Read Existing `README.md` First**: Whenever inspecting a folder that already contains a `README.md`, read it first as the primary source of truth for routing decisions.
-
-7. **DIRECT TOOL EXECUTION (Zero Reasoning Loops)**:
-   - **NEVER** write pseudo-code tool calls (`tool_name(...)`) inside your reasoning/thought block or plain text response.
-   - Emit **actual tool calls immediately** (`list_files`, `create_folder`, `move_file`, `write_file` via MCP or local filesystem/bash tools).
-   - Work **one folder at a time**: complete the reorganization of one folder before moving to the next.
+6. **SELF-DOCUMENTING `README.md` & LANGUAGE ADAPTATION**:
+   - Communicate and write `README.md` files in the **same language used by the user**.
+   - For every organized folder and newly created subfolder, create or update its `README.md` so future LLMs know what belongs inside.
+   - Work **one folder at a time** and **stop immediately (Fail-Fast)** if any file move returns an error (such as HTTP 404).
 
 ---
 
 ## 2. Standard `README.md` Template for Folders
-
-Every `README.md` created inside a folder or subfolder must follow this concise structure (translated into the user's language):
 
 ```markdown
 # [Folder Name]
@@ -68,11 +51,11 @@ Every `README.md` created inside a folder or subfolder must follow this concise 
 [Brief description of what this folder represents and its semantic scope]
 
 ## Allowed Contents
-- [Typical file types and formats stored here, e.g., PDF invoices, medical reports, contracts, images]
+- [Typical file types stored here]
 
 ## Routing Rules for LLMs
 - **Route here**: [Semantic criteria for placing new files into this folder]
-- **Subfolders**: [List and purpose of any child subfolders]
+- **Subfolders**: [List and purpose of child subfolders, if any]
 - **Cognitive Target**: Maintain 5 to 9 items (Miller's Law: 7 ± 2).
 ```
 
@@ -80,38 +63,15 @@ Every `README.md` created inside a folder or subfolder must follow this concise 
 
 ## 3. Step-by-Step Operational Workflow
 
-### Step 1: Root Scan & Target Environment Detection
-- Identify the target backend specified by the user:
-  - **MCP Server** (e.g., Nextcloud `nextcloud_list_files`, WebDAV, Google Drive, or generic `filesystem_list_directory`).
-  - **Local Filesystem** (system tools or `python3 scripts/organizer_helper.py audit <path>`).
-- Scan the root or target path and call `list_files` on each subdirectory to count its actual items (never rely on `size_bytes: 0`).
-- If the user has not yet specified their **category classification (mental model)**, briefly propose top-level categories and ask for confirmation:
-  - **Personal** (ID documents, contracts, health/medical)
-  - **University / Study** (Exams, courses, thesis projects, papers)
-  - **Finance** (Expenses, receipts, bank statements, taxes)
-  - **Projects** (Software, scripts, repositories, reports)
-  - Or other macro-areas matching the existing structure (e.g., `Photos`, `Archive`).
-
-### Step 2: Folder-by-Folder Reorganization (Miller's Law: 7 ± 2)
-For each folder containing **more than 9 items (OVERFLOW)** or needing consolidation into the user's categories:
-1. **Context Analysis**:
-   - Call `list_files` on the folder to see all files AND subfolders inside it.
-   - If a `README.md` already exists, read it to learn the folder's rules.
-   - Inspect files: read a snippet for supported formats, or use filename/extension for formats remembered as unreadable.
-   - For any subfolder (`"is_directory": true`), call `list_files` on it first to check whether it is an **Atomic Software Project** (`Cargo.toml`, `package.json`, `.git`, etc.) or a regular document subfolder.
-2. **Create Thematic Subfolders**:
-   - Group items logically (e.g., in `Photos`: `Photos/Nature`, `Photos/Events`; in `Documents`: `Documents/Health`, `Documents/Identity`) so the parent folder and each subfolder stay within **5 to 9 items**.
-   - Immediately invoke `create_folder(path=...)` (or `mkdir -p`).
-3. **Move Files Safely (Move-Only & Fail-Fast Protocol)**:
-   - **Move** files into their respective subfolders using `move_file(from=..., to=...)` (or `mv`). **Never delete user files** (unless verified as exact hash duplicates).
-   - If a destination subfolder with the same name already exists, move the inner items individually and verify with `list_files` that the source subfolder is `[]` before removing the empty directory shell.
-   - **FAIL-FAST**: If any move returns an error (e.g., **HTTP 404**, *File not found*, *Permission denied*), **STOP IMMEDIATELY**. Do not delete anything, do not invent fallback files, and report the exact error to the user.
-4. **Generate `README.md`**:
-   - Write the `README.md` inside the reorganized parent folder and inside each newly created subfolder.
-5. **Verify Count & Re-Check (`list_files`)**:
-   - Call `list_files` on the folder to confirm that all moves succeeded and that item counts now respect the **5 to 9 items** range.
-   - Never remove any consolidated old folder shell without first calling `list_files` on it and proving it contains `0` remaining user items (`[]`).
-
-### Step 3: Proceed to Next Folder & Final Summary
-- Repeat Step 2 for the next folder until the entire target tree is balanced and documented.
-- Present a clean summary table showing created subfolders, generated `README.md` files, moved files, and final item counts.
+1. **Step 1 — Root Scan & Category Alignment**:
+   - Call your list-files tool (e.g., `mcp__...__nextcloud_list_files`) on the root directory `/` and on each non-excluded directory to count actual items.
+   - If the user has not specified their top-level categories, propose categories (`Personal`, `University`, `Finance`, `Projects`) and ask for confirmation.
+2. **Step 2 — Folder-by-Folder Reorganization (Miller's Law: 5 to 9 Items)**:
+   - For each directory with **more than 9 items (OVERFLOW)** or needing consolidation into the user's categories:
+     1. Inspect contents with your list-files tool (and check subfolders to protect atomic software projects).
+     2. Create logical thematic subfolders using your create-folder tool (e.g., `mcp__...__nextcloud_create_folder`) so every folder holds **5 to 9 items**.
+     3. Move files into their subfolders using your move-file tool (e.g., `mcp__...__nextcloud_move_file`). If a destination folder with the same name already exists, move inner items individually.
+     4. Write or update the `README.md` in the parent folder and each new subfolder using your write-file tool (e.g., `mcp__...__nextcloud_write_file`).
+     5. Re-check with your list-files tool to confirm item counts (`5–9`) and verify `[]` (`0` items) before removing any consolidated empty folder shell.
+3. **Step 3 — Final Summary**:
+   - Once all folders are balanced and documented, present a clean summary table of reorganized folders, moved files, and generated `README.md` indexes.

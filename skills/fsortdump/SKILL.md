@@ -3,57 +3,52 @@ name: fsortdump
 description: "Empty and reorganize files and subfolders from a dump or inbox folder (Upload, Downloads, Inbox) into the structured filesystem by semantic context, guaranteeing zero remainder and updating subfolder README.md files."
 ---
 
-# /fsortdump — Dump / Inbox Zero-Remainder Organizer
+# fsortdump — Dump / Inbox Zero-Remainder Organizer
 
-Completely empty the **contents** (both loose files and subfolders) of a transit, inbox, or dump directory (such as `Upload`, `Downloads`, or `Inbox`) by analyzing the semantic context of every file and subfolder, **moving** everything into the organized filesystem, and guaranteeing **zero remaining items inside the dump folder** while respecting **Miller's Law (7 ± 2)**.
+> **EXECUTION GATE**: If this `SKILL.md` is already loaded in your context, **DO NOT call `read_skill` again**. Immediately start Step 1 by calling your active storage/MCP tools.
+> **EXACT TOOL NAMES**: Always call the **exact tool name** declared in your active tool definitions (for example, `mcp__...__nextcloud_list_files`, `mcp__...__nextcloud_move_file`, `mcp__...__nextcloud_create_folder`, `mcp__...__nextcloud_read_file`, `mcp__...__nextcloud_write_file`, or your local filesystem tools). **NEVER** invent bare function names that are not in your registered tool schema.
+
+Completely empty the **contents** (both loose files and subfolders) of a transit, inbox, or dump directory (such as `Upload`, `Downloads`, or `Inbox`) by moving every file and subfolder into the organized filesystem, respecting **Miller's Law (7 ± 2: 5 to 9 items per folder)** and updating subfolder `README.md` indexes.
 
 ---
 
-## 1. Non-Negotiable Safety, Move-Only & Inspection Rules
+## 1. Core Safety & Inspection Rules
 
-1. **ZERO FILE DELETION POLICY (MOVE-ONLY ORGANIZER)**:
-   - **You are a File Organizer, NOT a File Deleter.** Your job is to **MOVE (`move_file`)** files and folders to their proper destination, **NEVER to delete user files (`delete_file` / `rm`)**.
-   - **THE ONLY EXCEPTION FOR FILES — VERIFIED IDENTICAL DUPLICATES (SAME HASH)**:
-     - You may delete a duplicate file **ONLY IF** you have verified that the exact same file already exists in the destination with the **identical cryptographic hash (SHA-256 / MD5)** (or verified byte-for-byte identical content and exact `size_bytes`).
-     - **NEVER** assume two files are duplicates based only on having the same or similar filename! If two files have the same name but different hashes/sizes, rename the incoming file (e.g., `filename_v2.ext`) and **move** it so zero data is ever lost.
-   - **EMPTY SUBFOLDER CLEANUP ONLY AFTER `list_files` = `[]`**:
-     - You may only remove a leftover subfolder inside the dump directory (e.g., `Upload/<subfolder>`) **after** moving all of its contents out AND calling `list_files("Upload/<subfolder>")` in the immediately preceding step to prove it contains `[]` (`0` files and `0` folders).
+1. **MOVE-ONLY POLICY (NEVER DELETE USER FILES)**:
+   - You are a **File Organizer**, not a file deleter. Always **move** files to their destination; **never delete user files**.
+   - **Single Exception (Identical Hash Duplicates)**: A duplicate file may only be deleted if you have verified that an identical copy already exists at the destination with the **exact same cryptographic hash (SHA-256 / MD5)** and byte size. If two files share a name but differ in content/hash, rename the incoming file (`_v2`) and move it.
 
-2. **NEVER DELETE THE DUMP FOLDER ITSELF (`/Upload`, `/Downloads`, `/Inbox`)**:
-   - **ABSOLUTE PROHIBITION**: **NEVER** call `delete_file` or `rmdir` on the root dump/inbox folder itself (e.g., **NEVER** delete `/Upload`).
-   - "Leaving `Upload` completely empty" means **moving** all files and subfolders **out of** `Upload` so the `Upload` directory remains alive as an empty container (`list_files("/Upload")` returns `[]` or only `Upload/README.md`).
-   - **NEVER move `Upload/README.md` into another folder** (e.g., never move `Upload/README.md` to `Personal/README.md`, as that overwrites the destination folder's index!).
+2. **NEVER DELETE THE ROOT DUMP FOLDER ITSELF (`/Upload`, `/Downloads`, `/Inbox`)**:
+   - **Never** delete the `/Upload` container directory itself. "Leaving `Upload` empty" means moving all files and subfolders **out of** `Upload` so `Upload` remains as an empty container ready for future uploads.
+   - **Never** move `Upload/README.md` into another folder (doing so would overwrite the destination folder's `README.md`).
 
-3. **`size_bytes: 0` ON A FOLDER DOES NOT MEAN IT IS EMPTY!**:
-   - In Nextcloud, WebDAV, and MCP directory listings, every directory (`"is_directory": true`) **ALWAYS reports `"size_bytes": 0`** even when it contains hundreds of files and subfolders!
-   - **NEVER** assume a folder or subfolder is empty because `size_bytes` is `0`.
-   - The **ONLY** valid proof that a folder is empty is calling `list_files(path="<folder_path>")` directly on that folder and receiving an empty list `[]` (`0` items).
+3. **`size_bytes: 0` ON A DIRECTORY NEVER MEANS IT IS EMPTY**:
+   - In Nextcloud, WebDAV, and MCP listings, every directory (`"is_directory": true`) **always reports `"size_bytes": 0`** even when full of files.
+   - **Never** assume a directory is empty based on `size_bytes: 0`. You must call your list-files tool directly on that directory path and confirm the returned list is `[]` (`0` items).
 
 4. **INSPECT EVERY SUBFOLDER INSIDE THE DUMP FOLDER (`Upload/<subfolder>`)**:
-   - When you run `list_files("/Upload")`, you must account for **every single item returned** — both files (`"is_directory": false`) and directories (`"is_directory": true`). Never skip or overlook a directory (such as `Upload/Code`, `Upload/Tesi`, `Upload/To save uni`, etc.).
-   - For **every subfolder** (`"is_directory": true`) inside `Upload`, you **MUST call `list_files("Upload/<subfolder>")` first** to inspect its contents before moving anything:
-     - **If it is a Software/Code Project** (contains `Cargo.toml`, `package.json`, `pyproject.toml`, `requirements.txt`, `go.mod`, `CMakeLists.txt`, `Makefile`, `pom.xml`, `build.gradle`, `Dockerfile`, or `.git/`): treat it as an **ATOMIC unit**. Never split its internal files; move the entire project folder intact to `Projects/<project_name>` (or `Progetti/<project_name>`).
-     - **If the destination already has a folder with the same name** (e.g., `Upload/Tesi` when `Università/Tesi` already exists, or `Upload/Code` when `Progetti/Code` already exists): calling `move_file("Upload/Tesi", "Università/Tesi")` may not merge them and will leave `Upload/Tesi` behind! Instead, call `list_files("Upload/<subfolder>")`, **move** the individual files/items inside `Upload/<subfolder>/...` to their destination, and then verify `list_files("Upload/<subfolder>")` is `[]` before removing the empty directory shell `Upload/<subfolder>`.
+   - Account for **every** file (`"is_directory": false`) and **every** directory (`"is_directory": true`) in `Upload`.
+   - For **every subfolder** inside `Upload` (e.g., `Upload/Code`, `Upload/Tesi`, `Upload/To save uni`), call your list-files tool on `Upload/<subfolder>` **before** acting:
+     - **Atomic Software Projects**: If the subfolder contains code project markers (`Cargo.toml`, `package.json`, `pyproject.toml`, `requirements.txt`, `go.mod`, `CMakeLists.txt`, `Makefile`, `pom.xml`, `build.gradle`, `Dockerfile`, `.git`), treat the whole project folder as an **indivisible atomic unit** and move the entire project folder intact into the Projects category. Never split its internal files.
+     - **Existing Destination Folder / Regular Subfolder**: If a folder with the same name already exists in the destination (e.g., `Università/Tesi` or `Progetti/Code`), moving the whole directory may leave the source behind. Instead, list the files inside `Upload/<subfolder>` and **move** each inner file/project to its destination category.
 
-5. **MANDATORY RE-CHECK (`list_files`) AFTER MOVES & BEFORE COMPLETION**:
-   - **After moving all items**, you **MUST** call `list_files("/Upload")` again to verify whether any files or subfolders are still inside `/Upload`.
-   - If any subfolder is still in `/Upload`, **NEVER call `delete_file` on it blindly**: call `list_files("/Upload/<subfolder>")`, move every remaining file inside it to the proper destination category, and re-verify with `list_files("/Upload/<subfolder>")` that it is `[]` before removing the empty subfolder shell.
+5. **MANDATORY RE-CHECK BEFORE REMOVING EMPTY SUBFOLDER SHELLS**:
+   - Before removing any emptied subfolder shell `Upload/<subfolder>`, you **must** call your list-files tool on `Upload/<subfolder>` in the immediately preceding step and verify it returns `[]` (`0` items). If even 1 item remains inside, move it first—never delete a non-empty folder.
+   - Before finishing, call your list-files tool on `/Upload` one final time to confirm `0` remaining user files and `0` remaining subfolders.
 
 6. **CONTENT INSPECTION & TOOL-CAPABILITY LEARNING**:
-   - Before routing a file into a destination folder, read that folder's `README.md` if present.
-   - Inspect file contents when a reader tool is available.
-   - **Memory of Unsupported Formats**: If a file extension (e.g., `.docx`, `.zip`, binary files, or images without vision tools) fails to read or returns binary bytes, **remember that extension as unreadable** for the session and skip reading subsequent files of that same extension, routing them by filename and path context instead.
+   - Read existing destination `README.md` files first to confirm where files belong.
+   - Read file contents when a reader tool is available. If an extension (e.g., `.docx`, `.zip`, binary files, or images without vision tools) fails or returns binary bytes, **remember that extension as unreadable** for the session and skip reading subsequent files of that extension, routing them by filename and path context.
 
-7. **LANGUAGE ADAPTATION & DIRECT TOOL EXECUTION**:
+7. **LANGUAGE ADAPTATION & FAIL-FAST**:
    - Communicate and write `README.md` files in the **same language used by the user**.
-   - Emit **real tool calls immediately** (`list_files`, `create_folder`, `move_file`, `write_file`). Never write pseudo-code tool calls in thoughts or text.
-   - **Strict Fail-Fast**: If a file move returns HTTP 404 or an I/O error, stop immediately and report the exact error without deleting anything.
+   - If any file move fails with an error (such as HTTP 404), **stop immediately** and report the error.
 
 ---
 
-## 2. Standard `README.md` Template for New Destination Folders
+## 2. Standard `README.md` Template for New Subfolders
 
-Whenever you create a new subfolder in the main filesystem (for instance, to respect **Miller's Law: 5 to 9 items per folder**), create a `README.md` inside it:
+Whenever you create a new subfolder in the main filesystem (for instance, when a destination folder exceeds **9 items** under Miller's Law $7 \pm 2$), write a `README.md` inside it:
 
 ```markdown
 # [Folder Name]
@@ -62,7 +57,7 @@ Whenever you create a new subfolder in the main filesystem (for instance, to res
 [Brief description of what this folder represents and its semantic scope]
 
 ## Allowed Contents
-- [Typical file types and formats stored here, e.g., PDF receipts, reports, images, code]
+- [Typical file types stored here]
 
 ## Routing Rules for LLMs
 - **Route here**: [Semantic criteria for placing new files into this folder]
@@ -73,24 +68,13 @@ Whenever you create a new subfolder in the main filesystem (for instance, to res
 
 ## 3. Step-by-Step Operational Workflow
 
-### Step 1: Full Inventory of Dump Folder & Root Categories
-1. Call `list_files` on the root directory (to see the exact names of the main destination folders, e.g. `Personal`, `Università`, `Finanze`, `Progetti`).
-2. Call `list_files` on the dump folder (e.g. `/Upload`).
-3. List out **all** items found in `/Upload`, explicitly separating:
-   - **Loose files** (`"is_directory": false`, ignoring `Upload/README.md` so you never move `Upload/README.md` over another folder's `README.md`).
-   - **Subfolders** (`"is_directory": true`, e.g. `Upload/Code`, `Upload/Tesi`, `Upload/To save uni`).
-4. For **every subfolder** found inside `/Upload`, immediately call `list_files("/Upload/<subfolder>")` (and recursively on any nested subfolders) so you know every single file and project inside them! Remember: `"size_bytes": 0` on a directory **never** means it is empty.
-
-### Step 2: Move Loose Files & Subfolder Contents (Move-Only, Never Delete Files)
-1. **Move Loose Files**:
-   - Move each file (`move_file`) to its matching destination folder according to semantic context and destination `README.md` rules.
-   - If a file with the same name already exists in the destination, check whether they have the exact same cryptographic hash (or identical byte-for-byte content and size). Only if they are verified identical duplicates may the redundant copy be removed; otherwise rename and move (`filename_v2.ext`).
-2. **Move Subfolders (`Upload/<subfolder>`)**:
-   - If `Upload/<subfolder>` is an **Atomic Software Project** (`Cargo.toml`, `package.json`, `.git`, etc.), move the entire project folder intact into the Projects category (e.g. `Progetti/<subfolder>`).
-   - Otherwise, move each item inside `Upload/<subfolder>/...` to its appropriate destination category/subfolder using `move_file`.
-   - If any destination folder exceeds **9 items** (Miller's Law: $7 \pm 2$), create a thematic subfolder with `create_folder` and write its `README.md`.
-
-### Step 3: Mandatory Re-Check (`list_files`) Before Removing Empty Subfolder Shells
-1. For each subfolder `Upload/<subfolder>` whose contents were moved out, call `list_files("/Upload/<subfolder>")` to **verify** it now returns `[]` (`0` items). Only after `list_files` confirms `[]` may you remove the empty directory shell `/Upload/<subfolder>`.
-2. Call `list_files("/Upload")` one final time to **verify** that the dump folder itself now contains `0` remaining files and `0` remaining subfolders (never delete `/Upload` itself!).
-3. Present a clear summary table of all moved files and subfolders (`Source ➔ Destination`).
+1. **Step 1 — List Root & Dump Folder**:
+   - Call your list-files tool (e.g., `mcp__...__nextcloud_list_files`) on the root directory `/` (to see exact category folder names, e.g., `Personal`, `Università`, `Finanze`, `Progetti`) and on `/Upload`.
+   - For **every subfolder** (`"is_directory": true`) found inside `/Upload`, call your list-files tool on `/Upload/<subfolder>` to see all files and projects inside it.
+2. **Step 2 — Move Loose Files & Subfolder Contents**:
+   - Move each loose file in `/Upload` (except `Upload/README.md`) to its matching destination category/subfolder using your move-file tool (e.g., `mcp__...__nextcloud_move_file`).
+   - Move atomic software projects intact to `Projects/` (`Progetti/`), and move the contents of regular subfolders inside `/Upload/<subfolder>` to their proper destination folders.
+   - If any destination folder exceeds **9 items**, create a thematic subfolder and write its `README.md`.
+3. **Step 3 — Re-Verify & Report**:
+   - Re-check each emptied `Upload/<subfolder>` with your list-files tool; only after confirming `[]` (`0` items), remove the empty subfolder shell.
+   - Re-check `/Upload` with your list-files tool to confirm `0` remaining user items (never delete `/Upload` itself), then present a clear summary table (`Source ➔ Destination`).
