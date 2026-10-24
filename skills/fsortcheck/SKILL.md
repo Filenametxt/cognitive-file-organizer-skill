@@ -9,20 +9,24 @@ Reorganize any target directory or storage archive by applying **Miller's Law (7
 
 ---
 
-## 1. Core Principles, Safety Verification & Tool-Capability Learning
+## 1. Core Principles, Move-Only Safety & Tool-Capability Learning
 
-1. **LANGUAGE ADAPTATION**:
-   - Always communicate with the user and write generated `README.md` files in the **same language used by the user** (e.g., Italian if prompted in Italian, English if prompted in English).
+1. **ZERO FILE DELETION POLICY (MOVE-ONLY ORGANIZER)**:
+   - **You are a File Organizer, NOT a File Deleter.** Your job is to **MOVE (`move_file`)** files and folders into an organized structure, **NEVER to delete user files (`delete_file` / `rm`)**.
+   - **THE ONLY EXCEPTION FOR FILES — VERIFIED IDENTICAL DUPLICATES (SAME HASH)**:
+     - You may delete a duplicate file **ONLY IF** you have verified that an identical copy already exists with the **exact same cryptographic hash (SHA-256 / MD5)** (or verified byte-for-byte identical content and exact `size_bytes`).
+     - **NEVER** assume two files are duplicates based only on having the same or similar filename! If two files have the same name but different hashes/sizes, rename one (`filename_v2.ext`) and **move** it so zero user data is ever lost.
+   - **EMPTY FOLDER SHELL CLEANUP ONLY AFTER `list_files` = `[]`**:
+     - You may only remove an obsolete directory shell (after consolidating all of its files into the user's categories) **after** calling `list_files` on that exact directory in the immediately preceding step and confirming it returns `[]` (`0` files and `0` subfolders).
+     - **NEVER** delete a permanent inbox/dump container folder (`/Upload`, `/Downloads`, `/Inbox`).
 
 2. **`size_bytes: 0` ON A DIRECTORY NEVER MEANS IT IS EMPTY!**:
    - In Nextcloud, WebDAV, and MCP directory listings, every directory (`"is_directory": true`) **ALWAYS reports `"size_bytes": 0`** even when it contains hundreds of files and subfolders!
    - **NEVER** assume a directory or subfolder is empty because `size_bytes` is `0`.
    - The **ONLY** valid way to check what is inside a directory (or verify if it is empty) is to call `list_files(path="<directory_path>")` directly on that directory and verify the returned list.
 
-3. **MANDATORY RE-CHECK (`list_files`) BEFORE DELETING ANY FOLDER**:
-   - **NEVER** delete a permanent inbox/dump container folder (such as `/Upload`, `/Downloads`, `/Inbox`).
-   - If you are consolidating an old folder (e.g., `/Documents` or `/Notes`) into the user's new categories and plan to remove the old folder after moving its contents, you **MUST** call `list_files(path="<old_folder>")` in the step immediately before calling `delete_file`.
-   - If `list_files` returns **even 1 file or 1 subfolder** (other than an obsolete `README.md`), **DO NOT DELETE THE FOLDER**! First inspect and move all remaining items, and re-run `list_files` until it confirms the folder is empty.
+3. **LANGUAGE ADAPTATION & `README.md` PROTECTION**:
+   - Always communicate with the user and write generated `README.md` files in the **same language used by the user** (e.g., Italian if prompted in Italian, English if prompted in English).
    - **NEVER move one folder's `README.md` into another folder** (e.g., never move `Documents/README.md` to `Personal/README.md`, as that overwrites `Personal`'s index!).
 
 4. **TOTAL COVERAGE WITH ATOMIC SOFTWARE PROJECT PROTECTION**:
@@ -98,15 +102,15 @@ For each folder containing **more than 9 items (OVERFLOW)** or needing consolida
 2. **Create Thematic Subfolders**:
    - Group items logically (e.g., in `Photos`: `Photos/Nature`, `Photos/Events`; in `Documents`: `Documents/Health`, `Documents/Identity`) so the parent folder and each subfolder stay within **5 to 9 items**.
    - Immediately invoke `create_folder(path=...)` (or `mkdir -p`).
-3. **Move Files Safely (Fail-Fast Protocol)**:
-   - Move files into their respective subfolders using `move_file(from=..., to=...)` (or `mv`).
-   - If a destination subfolder with the same name already exists, move the inner items individually and verify with `list_files` that the source subfolder is empty before removing it.
+3. **Move Files Safely (Move-Only & Fail-Fast Protocol)**:
+   - **Move** files into their respective subfolders using `move_file(from=..., to=...)` (or `mv`). **Never delete user files** (unless verified as exact hash duplicates).
+   - If a destination subfolder with the same name already exists, move the inner items individually and verify with `list_files` that the source subfolder is `[]` before removing the empty directory shell.
    - **FAIL-FAST**: If any move returns an error (e.g., **HTTP 404**, *File not found*, *Permission denied*), **STOP IMMEDIATELY**. Do not delete anything, do not invent fallback files, and report the exact error to the user.
 4. **Generate `README.md`**:
    - Write the `README.md` inside the reorganized parent folder and inside each newly created subfolder.
 5. **Verify Count & Re-Check (`list_files`)**:
    - Call `list_files` on the folder to confirm that all moves succeeded and that item counts now respect the **5 to 9 items** range.
-   - Never delete any obsolete folder without first calling `list_files` on it and proving it contains `0` remaining user items.
+   - Never remove any consolidated old folder shell without first calling `list_files` on it and proving it contains `0` remaining user items (`[]`).
 
 ### Step 3: Proceed to Next Folder & Final Summary
 - Repeat Step 2 for the next folder until the entire target tree is balanced and documented.

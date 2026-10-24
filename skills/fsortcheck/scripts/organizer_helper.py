@@ -2,11 +2,12 @@
 """
 File Organizer Helper Script
 Cognitive load auditor based on Miller's Law (7 ± 2 rule: optimal range 5 to 9 items per folder),
-Atomic Software Project detector, and Zero-Remainder verifier for dump/inbox directories.
+Atomic Software Project detector, SHA-256 exact duplicate verifier, and Zero-Remainder verifier.
 Backend-agnostic utility for local filesystems and mounted WebDAV/Nextcloud directories.
 """
 
 import argparse
+import hashlib
 import os
 import sys
 from pathlib import Path
@@ -59,13 +60,21 @@ PROJECT_MARKERS = {
 }
 
 
+def compute_sha256(file_path: Path) -> str:
+    """Compute SHA-256 hash of a file in chunks."""
+    h = hashlib.sha256()
+    with file_path.open("rb") as f:
+        for chunk in iter(lambda: f.read(65536), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
 def detect_project_markers(dirs: list[str], files: list[str]) -> list[str]:
     """
     Return any software project markers found in the given directory's entries.
     """
     entries = set(dirs) | set(files)
     found = sorted(marker for marker in PROJECT_MARKERS if marker in entries)
-    # Also check for .sln or .csproj files
     for f in files:
         if f.endswith((".sln", ".csproj", ".fsproj", ".xcodeproj")):
             found.append(f)
@@ -126,14 +135,14 @@ def audit_directory(root_path: Path, max_depth: int = 3, recursive: bool = True)
             status = "OVERFLOW"
             action = (
                 f"Cognitive overload ({item_count} > {IDEAL_MAX}). "
-                "Create thematic subfolders (by topic, year, or type)."
+                "Create thematic subfolders and MOVE files (never delete user files)."
             )
         elif 0 < item_count < IDEAL_MIN and current != root_path:
             status = "SPARSE"
-            action = f"Underpopulated ({item_count} < {IDEAL_MIN}). Consider consolidating."
+            action = f"Underpopulated ({item_count} < {IDEAL_MIN}). Consider consolidating by moving."
         elif item_count == 0:
             status = "EMPTY"
-            action = "Empty directory. Consider removing if unused."
+            action = "Empty directory (0 items). Never delete root inbox/dump folder."
 
         results.append(
             {
@@ -161,9 +170,13 @@ def check_dump_status(dump_path: Path):
     if not dump_path.exists():
         return False, f"Dump directory '{dump_path}' does not exist."
 
-    items = [item for item in dump_path.iterdir() if not item.name.startswith(".")]
+    items = [
+        item
+        for item in dump_path.iterdir()
+        if not item.name.startswith(".") and item.name.lower() != "readme.md"
+    ]
     if len(items) == 0:
-        return True, "Dump directory is completely empty (0 files, 0 folders)."
+        return True, "Dump directory is completely empty (0 user files, 0 folders)."
     else:
         file_list = ", ".join(item.name for item in items[:5])
         extra = f" (and {len(items) - 5} more)" if len(items) > 5 else ""
@@ -172,7 +185,7 @@ def check_dump_status(dump_path: Path):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="File Organizer Helper — Miller's Law (7 ± 2) Auditor & Project Detector"
+        description="File Organizer Helper — Miller's Law (7 ± 2) Auditor, Project Detector & Hash Duplicate Checker"
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
@@ -193,6 +206,14 @@ def main():
         "verify-dump", help="Verify that a dump/inbox folder has 0 remaining items"
     )
     dump_parser.add_argument("path", type=str, help="Path to the dump/inbox directory")
+
+    # Subcommand: check-duplicate
+    dup_parser = subparsers.add_parser(
+        "check-duplicate",
+        help="Verify whether two files are identical byte-for-byte via SHA-256 hash",
+    )
+    dup_parser.add_argument("file_a", type=str, help="First file path")
+    dup_parser.add_argument("file_b", type=str, help="Second file path")
 
     args = parser.parse_args()
 
@@ -223,6 +244,23 @@ def main():
             sys.exit(0)
         else:
             print(f"WARNING: {msg}", file=sys.stderr)
+            sys.exit(1)
+
+    elif args.command == "check-duplicate":
+        path_a = Path(args.file_a).resolve()
+        path_b = Path(args.file_b).resolve()
+        if not path_a.is_file() or not path_b.is_file():
+            print("ERROR: Both paths must be existing files.", file=sys.stderr)
+            sys.exit(2)
+        hash_a = compute_sha256(path_a)
+        hash_b = compute_sha256(path_b)
+        print(f"SHA256({path_a.name}) = {hash_a}")
+        print(f"SHA256({path_b.name}) = {hash_b}")
+        if hash_a == hash_b and path_a.stat().st_size == path_b.stat().st_size:
+            print("EXACT_DUPLICATE: True (identical SHA-256 hash and byte size)")
+            sys.exit(0)
+        else:
+            print("EXACT_DUPLICATE: False (different content — DO NOT DELETE, rename and move!)")
             sys.exit(1)
 
 
