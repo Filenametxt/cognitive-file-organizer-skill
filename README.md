@@ -132,21 +132,28 @@ Because these skills are storage-agnostic, **always tell the agent which environ
 
 Tell the agent how you mentally divide your files (your top-level taxonomy), or let `/fsortcheck` ask you before moving folders. Providing your categories upfront makes execution faster and tailored to your workflow.
 
+### How to Trigger the Skills (`@` vs `/`)
+
+Different coding agents use slightly different prefixes to invoke skills:
+- **Unsloth Desktop (Unsloth Studio)**: Use **`@fsortcheck`** and **`@fsortdump`** (type `@` in the chat input to autocomplete and preload the skill).
+- **Claude Code / Cursor / OpenAI Codex**: Use **`/fsortcheck`** and **`/fsortdump`** (or mention the skill by name).
+- **Google Antigravity / Other Agents**: Mention **`fsortcheck`** or **`fsortdump`** directly in your prompt.
+
 #### Example Prompts
 
-**Reorganizing a Nextcloud drive with `/fsortcheck`:**
+**Reorganizing a Nextcloud drive on Unsloth Desktop (`@fsortcheck`):**
 ```text
-/fsortcheck Use my Nextcloud MCP tools. Reorganize my root workspace using these top-level categories: [Personal, University, Finance, Projects, Archive].
+@fsortcheck Use my Nextcloud MCP tools. Reorganize my root workspace using these top-level categories: [Personal, University, Finance, Projects, Archive].
 ```
 
-**Emptying an `Upload` dump folder on Nextcloud with `/fsortdump`:**
+**Emptying an `Upload` dump folder on Nextcloud (`@fsortdump` / `/fsortdump`):**
 ```text
-/fsortdump Use my Nextcloud MCP tools to empty the "Upload" folder and route all files into my main folders [Personal, University, Finance, Projects] leaving Upload completely empty.
+@fsortdump Use my Nextcloud MCP tools to empty the "Upload" folder and route all files into my main folders [Personal, University, Finance, Projects] leaving Upload completely empty.
 ```
 
-**Reorganizing a local directory with `/fsortcheck`:**
+**Reorganizing a local directory (`/fsortcheck` or `@fsortcheck`):**
 ```text
-/fsortcheck Reorganize my local folder ~/Documents using local filesystem tools. My main categories are [Work, Personal, Taxes, Side-Projects].
+@fsortcheck Reorganize my local folder ~/Documents using local filesystem tools. My main categories are [Work, Personal, Taxes, Side-Projects].
 ```
 
 ---
@@ -200,14 +207,14 @@ python3 skills/fsortdump/scripts/organizer_helper.py verify-dump ~/Downloads
 
 ## Agent Compatibility Matrix
 
-| AI Agent / IDE | Status | Skill Directory |
-|---|---|---|
-| **Unsloth Desktop (Unsloth Studio)** | **Tested & Verified** | `~/.agents/skills/` & `~/.unsloth/skills/` |
-| **Claude Code** | Compatible (`SKILL.md` + `.claude-plugin`) | `~/.claude/skills/` |
-| **OpenAI Codex CLI** | Compatible (`SKILL.md` + `.codex-plugin`) | `~/.codex/skills/` |
-| **Cursor** | Compatible (`SKILL.md` + `.cursor-plugin`) | `~/.cursor/skills/` or `.agents/skills/` |
-| **Google Antigravity** | **Tested & Verified** | `~/.gemini/antigravity-cli/skills/` |
-| **Windsurf / Cline / Roo Code / OpenCode** | Compatible (`SKILL.md` standard) | `.agents/skills/` |
+| AI Agent / IDE | Trigger Syntax | Status | Skill Directory |
+|---|---|---|---|
+| **Unsloth Desktop (Unsloth Studio)** | `@fsortcheck` / `@fsortdump` | **Tested & Verified** | `~/.agents/skills/` & `~/.unsloth/skills/` |
+| **Claude Code** | `/fsortcheck` / `/fsortdump` | Compatible (`SKILL.md` + `.claude-plugin`) | `~/.claude/skills/` |
+| **OpenAI Codex CLI** | `/fsortcheck` / `$fsortcheck` | Compatible (`SKILL.md` + `.codex-plugin`) | `~/.codex/skills/` |
+| **Cursor** | `/fsortcheck` / `@fsortcheck` | Compatible (`SKILL.md` + `.cursor-plugin`) | `~/.cursor/skills/` or `.agents/skills/` |
+| **Google Antigravity** | Mention `fsortcheck` / `fsortdump` | **Tested & Verified** | `~/.gemini/antigravity-cli/skills/` |
+| **Windsurf / Cline / Roo Code / OpenCode** | `/fsortcheck` or mention | Compatible (`SKILL.md` standard) | `.agents/skills/` |
 
 ---
 
