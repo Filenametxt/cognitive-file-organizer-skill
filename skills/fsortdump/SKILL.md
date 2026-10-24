@@ -90,22 +90,7 @@ Whenever you create a new subfolder in the main filesystem (for instance, to res
    - Otherwise, move each item inside `Upload/<subfolder>/...` to its appropriate destination category/subfolder using `move_file`.
    - If any destination folder exceeds **9 items** (Miller's Law: $7 \pm 2$), create a thematic subfolder with `create_folder` and write its `README.md`.
 
-### Step 3: Mandatory Re-Check (`list_files`) & Final Summary Report
+### Step 3: Mandatory Re-Check (`list_files`) Before Removing Empty Subfolder Shells
 1. For each subfolder `Upload/<subfolder>` whose contents were moved out, call `list_files("/Upload/<subfolder>")` to **verify** it now returns `[]` (`0` items). Only after `list_files` confirms `[]` may you remove the empty directory shell `/Upload/<subfolder>`.
 2. Call `list_files("/Upload")` one final time to **verify** that the dump folder itself now contains `0` remaining files and `0` remaining subfolders (never delete `/Upload` itself!).
-3. **MANDATORY FINAL SUMMARY REPORT**: Once `list_files("/Upload")` confirms the dump folder is empty, you **MUST** output a concise final summary report (translated into the user's language) following this exact structure:
-
-```markdown
-### Summary Report (`/fsortdump`)
-
-**1. Moved Files & Subfolders (`Source ➔ Destination`)**
-- `Upload/file.ext` ➔ `Category/Subfolder/file.ext`
-- `Upload/Subfolder/item.ext` ➔ `Category/item.ext`
-- `Upload/project_dir/` ➔ `Projects/project_dir/` *(Atomic Project)*
-
-**2. New Subfolders & `README.md` Indexes Created**
-- `Category/Subfolder/` (`README.md` generated)
-
-**3. Dump Folder Verification (`list_files`)**
-- `Upload/` verified empty (`0` remaining files, `0` remaining subfolders). Zero user files deleted.
-```
+3. Present a clear summary table of all moved files and subfolders (`Source ➔ Destination`).

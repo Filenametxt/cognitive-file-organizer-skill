@@ -29,7 +29,7 @@ Autonomous, move-only **AI Agent Skills** that organize your **local folders** o
 2. **Move-Only (Never Deletes Files)**: Files are **only moved (`move_file`)**, never deleted—except verified byte-for-byte duplicates sharing the **exact same SHA-256 hash**.
 3. **Protects Code Projects**: Detects programming projects (`Cargo.toml`, `package.json`, `pyproject.toml`, `go.mod`, `.git`, etc.) and moves them as **intact atomic units** without touching internal files.
 4. **Self-Documenting `README.md`**: Places a short `README.md` in every organized subfolder so future LLMs know what belongs inside without re-reading every file.
-5. **Smart Re-Check & Final Summary Report**: Learns unreadable binary formats (`.docx`, `.zip`) to avoid wasted tool calls, re-verifies folders with `list_files`, and always outputs a clear **Summary Report (`Source ➔ Destination`)** at the end.
+5. **Smart Inspection & Re-Check**: Learns unreadable binary formats (`.docx`, `.zip`) to avoid wasted tool calls, and always re-verifies folders with `list_files` before finishing.
 
 ---
 
@@ -45,7 +45,7 @@ Autonomous, move-only **AI Agent Skills** that organize your **local folders** o
   [3. Move & Balance (7 ± 2)] ──► Keep 5–9 items/folder · Protect code projects · Move-only
          │
          ▼
-  [4. Document, Verify & Report] ──► Write README.md · Re-check list_files · Final Summary Report
+  [4. Document & Verify] ──► Write subfolder README.md · Re-check with list_files
 ```
 
 ---
